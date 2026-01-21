@@ -73,11 +73,33 @@ int main(void)
         return 1;
     }
 
+    /* --------- DISK (C:\) --------- */
+    ULARGE_INTEGER freeBytesAvail, totalBytes, totalFreeBytes;
+
+    if (!GetDiskFreeSpaceExA("C://", &freeBytesAvail, &totalBytes, &totalFreeBytes))
+    {
+        printf("{\"ok\": false, \"error\": \"GetDiskFreeSpaceExA failed\"}\n");
+        return 1;
+    }
+
+    double disk_total_gb = (double)totalBytes.QuadPart / (1024 * 1024 * 1024);
+    double disk_free_gb = (double)totalFreeBytes.QuadPart / (1024 * 1024 * 1024);
+    double disk_used_gb = disk_total_gb - disk_free_gb;
+    double disk_used_percent = 0.0;
+
+    if (disk_used_percent > 0.0)
+    {
+        disk_used_percent = (disk_used_gb * 100) / disk_total_gb;
+    }
+
     /* --------- OUTPUT JSON --------- */
     printf(
         "{\"ok\": true, \"cpu_percent\": %.1f, "
-        "\"mem_total_mb\": %llu, \"mem_free_mb\": %llu, \"mem_used_mb\": %llu, \"mem_used_percent\": %.1f}\n",
-        cpu_percent, total_mb, free_mb, used_mb, mem_used_percent);
+        "\"mem_total_mb\": %llu, \"mem_free_mb\": %llu, \"mem_used_mb\": %llu, \"mem_used_percent\": %.1f, "
+        "\"disk_total_gb\": %.1f, \"disk_free_gb\": %.1f, \"disk_used_gb\": %.1f, \"disk_used_percent\": %.1f}\n",
+        cpu_percent,
+        total_mb, free_mb, used_mb, mem_used_percent,
+        disk_total_gb, disk_free_gb, disk_used_gb, disk_used_percent);
 
     return 0;
 }
