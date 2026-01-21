@@ -1,22 +1,33 @@
 import subprocess
 import json
+import time
+import os
 
-result = subprocess.run(
-    ["../c-core/collector.exe"],
-    capture_output=True,
-    text=True
-)
+def clear_screen():
+    os.system("cls")
 
-raw_output = result.stdout.strip()
-data = json.loads(raw_output)
+while True:
+    result = subprocess.run(
+        ["../c-core/collector.exe"],
+        capture_output=True,
+        text=True
+    )
 
-if not data.get("ok"):
-    print("C program reporterd an error:", data)
-else:
-    total = data["mem_total_mb"]
-    free = data["mem_free_mb"]
-    used = data["mem_used_mb"]
-    pct = data["mem_used_percent"]
+    data = json.loads(result.stdout.strip())
 
-    print(f"RAM Used: {used} MB / {total} MB ({pct}%)")
-    print(f"RAM Free: {free} MB")
+    clear_screen()
+
+    if not data.get("ok"):
+        print("C program reporterd an error:", data)
+    else:
+        cpu = data["cpu_percent"]
+        total = data["mem_total_mb"]
+        free = data["mem_free_mb"]
+        used = data["mem_used_mb"]
+        mem_pct = data["mem_used_percent"]
+
+        print("=== SysMon (C + Python) ===")
+        print(f"CPU: {cpu:.1f}%")
+        print(f"RAM: {used} / {total} MB ({mem_pct:.1f}%)")
+
+        time.sleep(1)
